@@ -1,0 +1,134 @@
+{
+  "scenario": "esparso",
+  "router": "epidemic",
+  "nodes": 4,
+  "total_created": 4,
+  "unique_deliveries": 3,
+  "delivery_rate": 0.75,
+  "average_latency": 22.333333333333332,
+  "total_transmissions": 7,
+  "overhead": 2.3333333333333335,
+  "contacts_processed": 5,
+  "duplicate_deliveries": 0,
+  "messages": [
+    {
+      "message_id": "m-1-0001",
+      "source_id": 1,
+      "destination_id": 4,
+      "created_at": 0.0,
+      "delivered_at": 14.0,
+      "latency": 14.0,
+      "path": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "status": "delivered"
+    },
+    {
+      "message_id": "m-2-0001",
+      "source_id": 2,
+      "destination_id": 4,
+      "created_at": 10.0,
+      "delivered_at": 40.0,
+      "latency": 30.0,
+      "path": [
+        2,
+        4
+      ],
+      "status": "delivered"
+    },
+    {
+      "id": "m-3-0001",
+      "source_id": 3,
+      "destination_id": 1,
+      "status": "not_delivered",
+      "created_at": 30.0,
+      "delivered_at": null,
+      "latency": null,
+      "path": [
+        3
+      ]
+    },
+    {
+      "message_id": "m-4-0001",
+      "source_id": 4,
+      "destination_id": 1,
+      "created_at": 2.0,
+      "delivered_at": 25.0,
+      "latency": 23.0,
+      "path": [
+        4,
+        3,
+        1
+      ],
+      "status": "delivered"
+    }
+  ],
+  "transmissions": [
+    {
+      "time": 0.0,
+      "message_id": "m-1-0001",
+      "from_node": 1,
+      "to_node": 2,
+      "ttl_before": 3,
+      "ttl_after": 2,
+      "delivered": false
+    },
+    {
+      "time": 6.0,
+      "message_id": "m-1-0001",
+      "from_node": 2,
+      "to_node": 3,
+      "ttl_before": 2,
+      "ttl_after": 1,
+      "delivered": false
+    },
+    {
+      "time": 14.0,
+      "message_id": "m-1-0001",
+      "from_node": 3,
+      "to_node": 4,
+      "ttl_before": 1,
+      "ttl_after": 0,
+      "delivered": true
+    },
+    {
+      "time": 14.0,
+      "message_id": "m-4-0001",
+      "from_node": 4,
+      "to_node": 3,
+      "ttl_before": 3,
+      "ttl_after": 2,
+      "delivered": false
+    },
+    {
+      "time": 25.0,
+      "message_id": "m-4-0001",
+      "from_node": 3,
+      "to_node": 1,
+      "ttl_before": 2,
+      "ttl_after": 1,
+      "delivered": true
+    },
+    {
+      "time": 40.0,
+      "message_id": "m-2-0001",
+      "from_node": 2,
+      "to_node": 4,
+      "ttl_before": 2,
+      "ttl_after": 1,
+      "delivered": true
+    },
+    {
+      "time": 40.0,
+      "message_id": "m-4-0001",
+      "from_node": 4,
+      "to_node": 2,
+      "ttl_before": 3,
+      "ttl_after": 2,
+      "delivered": false
+    }
+  ]
+}

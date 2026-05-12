@@ -1,0 +1,101 @@
+{
+  "scenario": "cadeia",
+  "router": "prophet",
+  "nodes": 4,
+  "total_created": 3,
+  "unique_deliveries": 1,
+  "delivery_rate": 0.3333333333333333,
+  "average_latency": 17.5,
+  "total_transmissions": 5,
+  "overhead": 5.0,
+  "contacts_processed": 6,
+  "duplicate_deliveries": 0,
+  "messages": [
+    {
+      "id": "m-1-0001",
+      "source_id": 1,
+      "destination_id": 4,
+      "status": "not_delivered",
+      "created_at": 0.0,
+      "delivered_at": null,
+      "latency": null,
+      "path": [
+        1
+      ]
+    },
+    {
+      "id": "m-2-0001",
+      "source_id": 2,
+      "destination_id": 4,
+      "status": "not_delivered",
+      "created_at": 6.0,
+      "delivered_at": null,
+      "latency": null,
+      "path": [
+        2
+      ]
+    },
+    {
+      "message_id": "m-4-0001",
+      "source_id": 4,
+      "destination_id": 1,
+      "created_at": 0.5,
+      "delivered_at": 18.0,
+      "latency": 17.5,
+      "path": [
+        4,
+        3,
+        2,
+        1
+      ],
+      "status": "delivered"
+    }
+  ],
+  "transmissions": [
+    {
+      "time": 8.0,
+      "message_id": "m-4-0001",
+      "from_node": 4,
+      "to_node": 3,
+      "ttl_before": 4,
+      "ttl_after": 3,
+      "delivered": false
+    },
+    {
+      "time": 15.0,
+      "message_id": "m-4-0001",
+      "from_node": 3,
+      "to_node": 2,
+      "ttl_before": 3,
+      "ttl_after": 2,
+      "delivered": false
+    },
+    {
+      "time": 15.0,
+      "message_id": "m-2-0001",
+      "from_node": 2,
+      "to_node": 3,
+      "ttl_before": 2,
+      "ttl_after": 1,
+      "delivered": false
+    },
+    {
+      "time": 18.0,
+      "message_id": "m-4-0001",
+      "from_node": 2,
+      "to_node": 1,
+      "ttl_before": 2,
+      "ttl_after": 1,
+      "delivered": true
+    },
+    {
+      "time": 18.0,
+      "message_id": "m-1-0001",
+      "from_node": 1,
+      "to_node": 2,
+      "ttl_before": 4,
+      "ttl_after": 3,
+      "delivered": false
+    }
+  ]
+}

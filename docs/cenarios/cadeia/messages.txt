@@ -1,0 +1,4 @@
+# tempo, origem, destino, ttl, payload
+0.0, 1, 4, 4, mensagem em cadeia de 1 para 4
+0.5, 4, 1, 4, mensagem em cadeia de 4 para 1
+6.0, 2, 4, 2, mensagem intermediaria de 2 para 4
