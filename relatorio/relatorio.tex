@@ -1,0 +1,244 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{left=3cm,right=2cm,top=3cm,bottom=2cm}
+\onehalfspacing
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!8},
+  columns=fullflexible
+}
+
+\title{
+  \textbf{Implementação de uma Rede P2P para Simulação de DTN em Cenários de Alta Latência e Desconexão}
+}
+\author{
+  Universidade Federal do Amazonas\\
+  Disciplina de Sistemas Distribuídos\\[0.5cm]
+  Márcio Éric Lamêgo Valente\\
+  José Santo de Moura Neto
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introdução}
+
+Este relatório apresenta a implementação de uma rede P2P simulada para cenários de DTN
+(\textit{Delay-Tolerant Network}), conforme a atividade prática da disciplina de Sistemas
+Distribuídos. O objetivo principal foi demonstrar, por meio de simulação, como mensagens
+podem ser armazenadas e encaminhadas em uma rede sem conectividade fim-a-fim garantida.
+
+Em redes DTN, os nós podem ficar desconectados durante longos períodos. Por isso, cada nó
+atua como uma entidade autônoma capaz de armazenar mensagens localmente e encaminhá-las
+quando encontra outro nó. Esse modelo é conhecido como \textit{store-and-forward}.
+
+\section{Objetivos}
+
+Os objetivos da implementação foram:
+
+\begin{itemize}
+  \item simular uma arquitetura P2P sem servidor central;
+  \item representar cada nó com identificador, buffer de mensagens, relógio lógico e lista de mensagens vistas;
+  \item implementar roteamento epidêmico para encaminhamento de mensagens;
+  \item simular contatos intermitentes entre pares de nós;
+  \item avaliar taxa de entrega, latência média e overhead;
+  \item executar testes em cenários denso, esparso e em cadeia.
+\end{itemize}
+
+\section{Arquitetura da Solução}
+
+A solução foi implementada em Python e utiliza uma simulação baseada em eventos discretos.
+Cada nó P2P é representado por uma entidade independente dentro do simulador. O simulador
+não funciona como servidor central de mensagens; ele apenas controla o avanço do tempo e
+agenda os eventos de contato definidos nos arquivos de entrada.
+
+Os principais módulos do sistema são:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{>{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}p{9cm}}
+\toprule
+\textbf{Módulo} & \textbf{Responsabilidade} \\
+\midrule
+\texttt{SimulationEngine} & Carrega entradas, agenda eventos e coordena a simulação. \\
+\texttt{ContactParser} & Lê o arquivo de contatos no formato \texttt{tempo\_inicio, tempo\_fim, noA, noB}. \\
+\texttt{MessageParser} & Lê mensagens iniciais e gera identificadores de mensagens. \\
+\texttt{Node} & Representa um nó P2P com buffer, mensagens vistas, relógio lógico e probabilidades de entrega. \\
+\texttt{EpidemicRouter} & Implementa a troca de resumos e transferência de mensagens ausentes. \\
+\texttt{MetricsCollector} & Registra entregas, transmissões, latência e overhead. \\
+\texttt{CLI} & Disponibiliza comandos para execução da simulação. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Modelo de Contatos}
+
+Os contatos são definidos em arquivos \texttt{contacts.txt}. Cada linha indica o intervalo
+em que dois nós podem se comunicar:
+
+\begin{lstlisting}
+tempo_inicio, tempo_fim, noA, noB
+\end{lstlisting}
+
+Exemplo:
+
+\begin{lstlisting}
+0.0, 5.0, 1, 2
+5.1, 8.0, 2, 3
+8.2, 12.0, 3, 1
+\end{lstlisting}
+
+Durante a simulação, os eventos são processados em ordem crescente de tempo. Quando ocorre
+um contato, os dois nós envolvidos executam a troca P2P.
+
+\section{Roteamento Epidêmico}
+
+O roteamento epidêmico foi implementado com base na troca de resumos de mensagens. Quando
+dois nós entram em contato, cada um informa ao outro quais mensagens já conhece. Em seguida,
+cada nó envia as mensagens que possui e que o outro ainda não viu.
+
+O processo executado em cada contato é:
+
+\begin{enumerate}
+  \item atualizar o relógio lógico dos nós para o tempo do contato;
+  \item obter o conjunto de mensagens vistas por cada nó;
+  \item identificar as mensagens que o outro nó ainda não possui;
+  \item filtrar mensagens com TTL maior que zero;
+  \item copiar a mensagem para o receptor, decrementando o TTL;
+  \item registrar a transmissão;
+  \item registrar entrega caso o receptor seja o destino final.
+\end{enumerate}
+
+O uso da lista de mensagens vistas evita loops, pois um nó não aceita novamente uma mensagem
+que já recebeu anteriormente. O TTL limita a quantidade máxima de saltos de cada mensagem,
+evitando propagação indefinida.
+
+\section{Interface de Execução}
+
+A execução principal é feita por linha de comando. Um exemplo de execução do cenário em
+cadeia com roteamento epidêmico é:
+
+\begin{lstlisting}
+python3 dtp2p.py simulate \
+  --contacts docs/cenarios/cadeia/contacts.txt \
+  --messages docs/cenarios/cadeia/messages.txt \
+  --router epidemic \
+  --log-level info
+\end{lstlisting}
+
+Também foi implementado suporte ao roteamento PROPHET como extensão:
+
+\begin{lstlisting}
+python3 dtp2p.py simulate \
+  --contacts docs/cenarios/denso/contacts.txt \
+  --messages docs/cenarios/denso/messages.txt \
+  --router prophet
+\end{lstlisting}
+
+\section{Cenários de Teste}
+
+Foram preparados três cenários principais:
+
+\begin{itemize}
+  \item \textbf{Cenário denso}: possui muitos contatos e múltiplos caminhos alternativos;
+  \item \textbf{Cenário esparso}: possui poucos contatos e longos intervalos sem conectividade;
+  \item \textbf{Cenário em cadeia}: os nós se conectam em sequência, exigindo encaminhamento por intermediários.
+\end{itemize}
+
+Esses cenários permitem observar o comportamento da rede em diferentes níveis de conectividade.
+No cenário denso, espera-se alta taxa de entrega e menor latência. No cenário esparso,
+espera-se maior latência e possibilidade de mensagens não entregues. No cenário em cadeia,
+verifica-se diretamente o funcionamento do modelo \textit{store-and-forward}.
+
+\section{Métricas}
+
+As métricas avaliadas foram:
+
+\begin{itemize}
+  \item \textbf{Taxa de entrega}: razão entre mensagens entregues e mensagens criadas;
+  \item \textbf{Latência média}: tempo médio entre criação e entrega das mensagens entregues;
+  \item \textbf{Overhead}: razão entre o total de transmissões e o total de entregas únicas.
+\end{itemize}
+
+\section{Resultados Obtidos}
+
+A Tabela~\ref{tab:resultados} apresenta os resultados obtidos com o roteamento epidêmico.
+
+\begin{table}[h]
+\centering
+\caption{Resultados dos cenários com roteamento epidêmico}
+\label{tab:resultados}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Cenário} & \textbf{Mensagens} & \textbf{Entregas} & \textbf{Taxa} & \textbf{Latência média} & \textbf{Overhead} \\
+\midrule
+Denso & 4 & 4 & 100,00\% & 1,70s & 3,00 \\
+Esparso & 4 & 3 & 75,00\% & 22,33s & 2,33 \\
+Cadeia & 3 & 2 & 66,67\% & 12,75s & 4,00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os resultados confirmam o comportamento esperado. O cenário denso obteve entrega completa,
+pois havia maior disponibilidade de contatos e caminhos alternativos. O cenário esparso
+apresentou menor taxa de entrega e maior latência, evidenciando o impacto da baixa
+conectividade. O cenário em cadeia demonstrou o encaminhamento por nós intermediários,
+caracterizando o funcionamento do modelo DTN.
+
+\section{Testes}
+
+A implementação possui testes automatizados usando \texttt{unittest}. A suíte cobre parsing
+de contatos, parsing de mensagens, simulação por eventos, TTL, cenários principais e a
+extensão PROPHET.
+
+O comando utilizado para validação foi:
+
+\begin{lstlisting}
+python3 -m unittest discover -s tests -v
+\end{lstlisting}
+
+Todos os testes executados passaram com sucesso.
+
+\section{Extensão PROPHET}
+
+Além do roteamento epidêmico, foi implementada uma extensão com o roteamento PROPHET
+(\textit{Probabilistic Routing Protocol using History of Encounters and Transitivity}).
+Esse algoritmo utiliza probabilidades de entrega baseadas no histórico de encontros entre
+nós, buscando reduzir transmissões desnecessárias quando comparado ao roteamento epidêmico.
+
+No cenário denso, por exemplo, a execução com PROPHET entregou todas as mensagens, com
+latência média de 1,95s e overhead de 2,50, indicando redução de transmissões em relação
+ao roteamento epidêmico no mesmo cenário.
+
+\section{Conclusão}
+
+A atividade foi implementada com sucesso. O sistema simula uma rede P2P em ambiente DTN,
+sem servidor central de entrega, utilizando contatos intermitentes, buffers por nó,
+controle de mensagens vistas, TTL e roteamento epidêmico.
+
+Os cenários testados demonstram a influência da conectividade na taxa de entrega, na
+latência e no overhead. A implementação atende aos requisitos mínimos da atividade e ainda
+inclui uma extensão com PROPHET para comparação com o roteamento epidêmico.
+
+\end{document}
